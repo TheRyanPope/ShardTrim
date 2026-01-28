@@ -1,0 +1,8 @@
+## Interface: 20505
+## Title: ShardTrim
+## Notes: Deletes excess Soul Shards down to a configurable number via /shardtrim. Supports /shardtrim <number>, /shardtrim reset, and /shardtrim help.
+## Author: Whare
+## Version: 1.0.0
+
+ShardTrim.lua
+## SavedVariables: ShardTrimDB
