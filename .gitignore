@@ -1,0 +1,19 @@
+# VS Code workspace settings
+.vscode/
+
+# Backup files created by editors
+*.toc~
+*.bak
+*.swp
+
+# Packaged zips
+*.zip
+
+# macOS Finder files
+.DS_Store
+
+# Windows thumbnail cache
+Thumbs.db
+
+# Node / npm (if you ever add scripts/tools)
+node_modules/
