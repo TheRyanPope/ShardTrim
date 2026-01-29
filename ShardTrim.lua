@@ -12,13 +12,46 @@ end
 
 local function ShowHelp()
     Print("Usage:")
-    Print("  /shardtrim           - Trim Soul Shards to the saved amount")
+    Print("  /shardtrim           - Trim all excess Soul Shards to the saved amount")
     Print("  /shardtrim <number>  - Set how many Soul Shards to keep")
     Print("  /shardtrim reset     - Reset to default (" .. DEFAULT_KEEP_COUNT .. ")")
     Print("  /shardtrim help      - Show this help")
+    Print("  /st                  - Alias for /shardtrim")
 end
 
-local function TrimShards(msg)
+-- Recursive function to delete shards safely with retry if cursor isn't ready
+local function DeleteShards(shards, index, KEEP_COUNT)
+    if index > #shards or index <= KEEP_COUNT then
+        Print("Trimming complete.")
+        return
+    end
+
+    local bag, slot = shards[index][1], shards[index][2]
+
+    -- Clear cursor before picking up
+    if CursorHasItem() then
+        ClearCursor()
+    end
+
+    -- Try to pick up the shard
+    C_Container.PickupContainerItem(bag, slot)
+
+    if CursorHasItem() then
+        -- Delete it if successfully on cursor
+        DeleteCursorItem()
+        -- Delay before moving to the next shard
+        C_Timer.After(0.08, function()
+            DeleteShards(shards, index + 1, KEEP_COUNT)
+        end)
+    else
+        -- Retry same shard after a short delay
+        C_Timer.After(0.05, function()
+            DeleteShards(shards, index, KEEP_COUNT)
+        end)
+    end
+end
+
+local function ShardTrim(msg)
     if not C_Container or not C_Container.GetContainerNumSlots then
         Print("|cffff5555Container API not available.|r")
         return
@@ -29,7 +62,7 @@ local function TrimShards(msg)
         return
     end
 
-    msg = msg and msg:lower():trim() or ""
+    msg = msg and msg:lower():gsub("^%s*(.-)%s*$", "%1") or ""
 
     -- Help
     if msg == "help" then
@@ -70,36 +103,19 @@ local function TrimShards(msg)
         end
     end
 
-    local deleted, failed = 0, 0
+    local totalShards = #shards
+    local extras = totalShards - KEEP_COUNT
 
-    -- Delete extras
-    for i = KEEP_COUNT + 1, #shards do
-        local bag, slot = shards[i][1], shards[i][2]
-
-        C_Container.PickupContainerItem(bag, slot)
-
-        if CursorHasItem() then
-            DeleteCursorItem()
-            deleted = deleted + 1
-        else
-            failed = failed + 1
-            Print("|cffff5555Delete failed|r (bag " .. bag .. ", slot " .. slot .. ")")
-        end
-
-        ClearCursor()
+    if extras <= 0 then
+        Print("No Soul Shards need trimming.")
+        return
     end
 
-    if deleted > 0 then
-        Print("Deleted " .. deleted .. " extra Soul Shard(s).")
-    else
-        Print("No Soul Shards needed trimming.")
-    end
-
-    if failed > 0 then
-        Print("|cffffff00" .. failed .. " Soul Shard(s) could not be deleted — try again.|r")
-    end
+    Print("Trimming " .. extras .. " extra Soul Shard(s)...")
+    DeleteShards(shards, KEEP_COUNT + 1, KEEP_COUNT)
 end
 
+-- Slash commands
 SLASH_SHARDTRIM1 = "/shardtrim"
 SLASH_SHARDTRIM2 = "/st"
-SlashCmdList.SHARDTRIM = TrimShards
+SlashCmdList.SHARDTRIM = ShardTrim
