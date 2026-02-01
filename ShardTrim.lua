@@ -107,7 +107,7 @@ local function ShardTrim(msg)
     local extras = totalShards - KEEP_COUNT
 
     if extras <= 0 then
-        Print("No Soul Shards need trimming.")
+        -- Print("No Soul Shards need trimming.")
         return
     end
 
