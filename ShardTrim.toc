@@ -1,8 +1,8 @@
 ## Interface: 20505
 ## Title: ShardTrim
-## Notes: Deletes excess Soul Shards down to a configurable number via /shardtrim. Supports /shardtrim <number>, /shardtrim reset, and /shardtrim help.
+## Notes: Deletes one excess Soul Shard per `/shardtrim` or `/st` use, trimming down toward a configurable keep count. Supports `/shardtrim <number>` to set the keep amount, `/shardtrim reset` to restore the default, and `/shardtrim help` for usage details.
 ## Author: Whare
-## Version: 1.0.1
+## Version: 1.0.3
 
 ShardTrim.lua
 ## SavedVariables: ShardTrimDB
